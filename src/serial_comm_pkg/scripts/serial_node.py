@@ -4,11 +4,16 @@ import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Imu
 import serial
+import struct
 
 class SerialNode:
-    def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
+    def __init__(self):
         # Initialize the node
         rospy.init_node('serial_node', anonymous=True)
+        
+        # Get parameters from the parameter server
+        port = rospy.get_param('~port', '/dev/ttyUSB0')
+        baudrate = rospy.get_param('~baudrate', 9600)
         
         # Set up the serial connection
         self.ser = serial.Serial(port, baudrate, timeout=1)
@@ -25,7 +30,7 @@ class SerialNode:
 
     def read_serial(self, event):
         if self.ser.in_waiting > 0:
-            data = self.ser.readline().decode('utf-8').strip()
+            data = self.ser.read(56)  # Read 56 bytes (14 floats * 4 bytes each)
             rospy.loginfo(f"Read from serial: {data}")
             imu_msg = self.parse_imu_data(data)
             if imu_msg:
@@ -33,25 +38,29 @@ class SerialNode:
 
     def parse_imu_data(self, data):
         try:
-            values = list(map(float, data.split(',')))
-            if len(values) != 13:
-                rospy.logwarn("Received data does not have 13 values")
+            # Unpack the binary data
+            values = struct.unpack('ffffffffffffff', data)  # 14 floats: 4 for quaternion, 3 for accel, 3 for gyro, 3 for mag, 1 for temp
+            if len(values) != 14:
+                rospy.logwarn("Received data does not have 14 values")
                 return None
             
             imu_msg = Imu()
-            imu_msg.orientation.x = values[0]
-            imu_msg.orientation.y = values[1]
-            imu_msg.orientation.z = values[2]
-            imu_msg.linear_acceleration.x = values[3]
-            imu_msg.linear_acceleration.y = values[4]
-            imu_msg.linear_acceleration.z = values[5]
-            imu_msg.angular_velocity.x = values[6]
-            imu_msg.angular_velocity.y = values[7]
-            imu_msg.angular_velocity.z = values[8]
+            imu_msg.header.stamp = rospy.Time.now()
+            imu_msg.header.frame_id = 'imu_frame'
+            imu_msg.orientation.x = round(values[0], 3)
+            imu_msg.orientation.y = round(values[1], 3)
+            imu_msg.orientation.z = round(values[2], 3)
+            imu_msg.orientation.w = round(values[3], 3)
+            imu_msg.linear_acceleration.x = round(values[4], 3)
+            imu_msg.linear_acceleration.y = round(values[5], 3)
+            imu_msg.linear_acceleration.z = round(values[6], 3)
+            imu_msg.angular_velocity.x = round(values[7], 3)
+            imu_msg.angular_velocity.y = round(values[8], 3)
+            imu_msg.angular_velocity.z = round(values[9], 3)
             # Magnetic field and temperature are not part of the standard Imu message
             # You might need to create a custom message or use additional topics for them
             return imu_msg
-        except ValueError as e:
+        except struct.error as e:
             rospy.logwarn(f"Error parsing IMU data: {e}")
             return None
 
@@ -65,8 +74,11 @@ class SerialNode:
 
 if __name__ == '__main__':
     try:
-        # Change the port and baudrate as necessary
-        serial_node = SerialNode(port='/dev/ttyUSB0', baudrate=9600)
+        # Load parameters from the configuration file
+        rospy.set_param('~port', '/dev/ttyUSB0')
+        rospy.set_param('~baudrate', 9600)
+        
+        serial_node = SerialNode()
         serial_node.run()
     except rospy.ROSInterruptException:
         pass
