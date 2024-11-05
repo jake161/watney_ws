@@ -72,28 +72,38 @@ void loop() {
   Serial.print(temp);
   Serial.println(" C");
 #else
-  // Raw data output
-  Serial.write((uint8_t*)&event.orientation.x, sizeof(event.orientation.x));
-  Serial.write((uint8_t*)&event.orientation.y, sizeof(event.orientation.y));
-  Serial.write((uint8_t*)&event.orientation.z, sizeof(event.orientation.z));
-
+  // CSV format output
   imu::Vector<3> accel = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-  Serial.write((uint8_t*)&accel.x(), sizeof(accel.x()));
-  Serial.write((uint8_t*)&accel.y(), sizeof(accel.y()));
-  Serial.write((uint8_t*)&accel.z(), sizeof(accel.z()));
-
   imu::Vector<3> gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
-  Serial.write((uint8_t*)&gyro.x(), sizeof(gyro.x()));
-  Serial.write((uint8_t*)&gyro.y(), sizeof(gyro.y()));
-  Serial.write((uint8_t*)&gyro.z(), sizeof(gyro.z()));
-
   imu::Vector<3> mag = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
-  Serial.write((uint8_t*)&mag.x(), sizeof(mag.x()));
-  Serial.write((uint8_t*)&mag.y(), sizeof(mag.y()));
-  Serial.write((uint8_t*)&mag.z(), sizeof(mag.z()));
-
   int8_t temp = bno.getTemp();
-  Serial.write((uint8_t*)&temp, sizeof(temp));
+
+  Serial.print(event.orientation.x);
+  Serial.print(",");
+  Serial.print(event.orientation.y);
+  Serial.print(",");
+  Serial.print(event.orientation.z);
+  Serial.print(",");
+  Serial.print(accel.x());
+  Serial.print(",");
+  Serial.print(accel.y());
+  Serial.print(",");
+  Serial.print(accel.z());
+  Serial.print(",");
+  Serial.print(gyro.x());
+  Serial.print(",");
+  Serial.print(gyro.y());
+  Serial.print(",");
+  Serial.print(gyro.z());
+  Serial.print(",");
+  Serial.print(mag.x());
+  Serial.print(",");
+  Serial.print(mag.y());
+  Serial.print(",");
+  Serial.print(mag.z());
+  Serial.print(",");
+  Serial.print(temp);
+  Serial.println();
 #endif
 
   // Delay for a bit before reading again
