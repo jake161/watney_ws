@@ -1,0 +1,6 @@
+[submodule "src/hector_slam"]
+	path = src/hector_slam
+	url = https://github.com/tu-darmstadt-ros-pkg/hector_slam.git
+[submodule "src/slam_gmapping"]
+	path = src/slam_gmapping
+	url = https://github.com/ros-perception/slam_gmapping.git
