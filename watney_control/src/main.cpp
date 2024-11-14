@@ -27,6 +27,8 @@ struct IMUData {
   int8_t temp;
 };
 
+uint8_t sys, gyro, accel, mag;
+
 void setup() {
   // Start the serial communication
   Serial.begin(9600);
@@ -55,22 +57,22 @@ void loop() {
   imu_data.orientation_z = quat.z();
 
   // Get acceleration data
-  imu::Vector<3> accel = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-  imu_data.accel_x = accel.x();
-  imu_data.accel_y = accel.y();
-  imu_data.accel_z = accel.z();
+  imu::Vector<3> accel_vector = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+  imu_data.accel_x = accel_vector.x();
+  imu_data.accel_y = accel_vector.y();
+  imu_data.accel_z = accel_vector.z();
 
   // Get gyroscope data
-  imu::Vector<3> gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
-  imu_data.gyro_x = gyro.x();
-  imu_data.gyro_y = gyro.y();
-  imu_data.gyro_z = gyro.z();
+  imu::Vector<3> gyro_vector = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+  imu_data.gyro_x = gyro_vector.x();
+  imu_data.gyro_y = gyro_vector.y();
+  imu_data.gyro_z = gyro_vector.z();
 
   // Get magnetometer data
-  imu::Vector<3> mag = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
-  imu_data.mag_x = mag.x();
-  imu_data.mag_y = mag.y();
-  imu_data.mag_z = mag.z();
+  imu::Vector<3> mag_vector = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+  imu_data.mag_x = mag_vector.x();
+  imu_data.mag_y = mag_vector.y();
+  imu_data.mag_z = mag_vector.z();
 
   // Get temperature data
   imu_data.temp = bno.getTemp();
@@ -114,6 +116,18 @@ void loop() {
   Serial.print("Temperature: ");
   Serial.print(imu_data.temp);
   Serial.println(" C");
+
+  bno.getCalibration(&sys, &gyro, &accel, &mag);
+
+  Serial.print("Calibration Status - ");
+  Serial.print("Sys: ");
+  Serial.print(sys);
+  Serial.print(" Gyro: ");
+  Serial.print(gyro);
+  Serial.print(" Accel: ");
+  Serial.print(accel);
+  Serial.print(" Mag: ");
+  Serial.println(mag);
 #else
   // Raw data output using struct
   Serial.write((uint8_t*)&imu_data, sizeof(imu_data));
