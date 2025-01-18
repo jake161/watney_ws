@@ -33,8 +33,8 @@ class SerialNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     parser = argparse.ArgumentParser(description='Serial JSON Communication')
-    parser.add_argument('port', type=str, nargs='?', default='/dev/ttyUSB0', help='Serial port name (e.g., COM1 or /dev/ttyUSB0)')
-    parser.add_argument('baudrate', type=int, nargs='?', default=9600, help='Serial baudrate (e.g., 9600 or 115200)')
+    parser.add_argument('port', type=str, nargs='?', default='/dev/serial0', help='Serial port name (e.g., COM1 or /dev/ttyUSB0)')
+    parser.add_argument('baudrate', type=int, nargs='?', default=115200, help='Serial baudrate (e.g., 9600 or 115200)')
     args = parser.parse_args()
     serial_node = SerialNode(args.port, args.baudrate)
     rclpy.spin(serial_node)
