@@ -1,7 +1,6 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-from high_to_low.msg import Handler1001
 import serial
 import threading
 import argparse
