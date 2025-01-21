@@ -27,15 +27,36 @@ class SerialNode(Node):
                 self.handle_json(data)
 
     def handle_json(self, data):
-        # parsing json for correct topic allocation
         try:
             json_data = json.loads(data)
             self.get_logger().info(f"Parsed JSON: {json_data}")
-            msg = String()
-            msg.data = json.dumps(json_data)
-            self.publisher_.publish(msg)
+            
+            if 'T' in json_data:
+                t_value = json_data['T']
+                handlers = {
+                    1001: self.handle_1001,
+                    1002: self.handle_1002,
+                    # Add more handlers as needed
+                }
+                handler = handlers.get(t_value, self.handle_default)
+                handler(json_data)
+            else:
+                self.get_logger().warning("No 'T' value found in JSON")
+
         except json.JSONDecodeError as e:
             self.get_logger().error(f"Failed to decode JSON: {e}")
+
+    def handle_1001(self, json_data):
+        self.get_logger().info("Handling T=1001")
+        # Add your handling code here
+
+    def handle_1002(self, json_data):
+        self.get_logger().info("Handling T=1002")
+        # Add your handling code here
+
+    def handle_default(self, json_data):
+        self.get_logger().error("T value not in dictionary")
+        # There should always be a value for T
 
     def write_serial(self, msg):
         self.ser.write(msg.data.encode() + b'\n')
