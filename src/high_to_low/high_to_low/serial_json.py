@@ -50,22 +50,25 @@ class SerialNode(Node):
     def handle_1002(self, json_data):
         self.get_logger().info("Handling T=1002")
         imu_msg = Imu()
-        
+            
+        imu_msg.header.stamp = self.get_clock().now().to_msg()
+        imu_msg.header.frame_id = "imu_frame"
+            
         imu_msg.orientation.x = 0.0  # Find a way to populate these. Could use a service that requests a few different messages.
         imu_msg.orientation.y = 0.0
         imu_msg.orientation.z = 0.0
         imu_msg.orientation.w = 1.0
-        
+            
         imu_msg.angular_velocity.x = json_data.get('gx', 0.0)
         imu_msg.angular_velocity.y = json_data.get('gy', 0.0)
         imu_msg.angular_velocity.z = json_data.get('gz', 0.0)
-        
+            
         imu_msg.linear_acceleration.x = json_data.get('ax', 0.0)
         imu_msg.linear_acceleration.y = json_data.get('ay', 0.0)
         imu_msg.linear_acceleration.z = json_data.get('az', 0.0)
-        
+            
         self.imu_publisher.publish(imu_msg)
-        self.get_logger().info(f"Published IMU data: {imu_msg}")
+        #self.get_logger().info(f"Published IMU data: {imu_msg}")
 
     def handle_default(self, json_data):
         pass
