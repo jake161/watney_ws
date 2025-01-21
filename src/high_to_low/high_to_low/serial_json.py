@@ -11,7 +11,6 @@ class SerialNode(Node):
         super().__init__('high_to_low_serial_node')
         self.publisher_ = self.create_publisher(String, '/h2l/read', 10) #continuosly publish to read
         self.subscription = self.create_subscription(String, '/h2l/write', self.write_serial, 10) # setup callback to write_serial
-        self.feedback_publisher = self.create_publisher(Handler1001, '/ugv/base_feedback', 10)
         self.subscription  # prevent unused variable warning
         self.ser = serial.Serial(port, baudrate, dsrdtr=None)
         self.ser.setRTS(False)
