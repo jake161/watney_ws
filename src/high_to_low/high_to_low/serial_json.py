@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from sensor_msgs.msg import Imu
 import serial
 import threading
 import argparse
@@ -9,8 +10,9 @@ import json
 class SerialNode(Node):
     def __init__(self, port, baudrate):
         super().__init__('high_to_low_serial_node')
-        self.publisher_ = self.create_publisher(String, '/h2l/read', 10) #continuosly publish to read
-        self.subscription = self.create_subscription(String, '/h2l/write', self.write_serial, 10) # setup callback to write_serial
+        self.publisher_ = self.create_publisher(String, '/ugv/read', 10) #continuosly publish to read
+        self.subscription = self.create_subscription(String, '/ugv/write', self.write_serial, 10) # setup callback to write_serial
+        self.imu_publisher = self.create_publisher(Imu, '/ugv/imu', 10) # publish imu data to /ugv/imu topic
         self.subscription  # prevent unused variable warning
         self.ser = serial.Serial(port, baudrate, dsrdtr=None)
         self.ser.setRTS(False)
@@ -47,7 +49,23 @@ class SerialNode(Node):
 
     def handle_1002(self, json_data):
         self.get_logger().info("Handling T=1002")
-        # Add your handling code here
+        imu_msg = Imu()
+        
+        imu_msg.orientation.x = 0.0  # Find a way to populate these. Could use a service that requests a few different messages.
+        imu_msg.orientation.y = 0.0
+        imu_msg.orientation.z = 0.0
+        imu_msg.orientation.w = 1.0
+        
+        imu_msg.angular_velocity.x = json_data.get('gx', 0.0)
+        imu_msg.angular_velocity.y = json_data.get('gy', 0.0)
+        imu_msg.angular_velocity.z = json_data.get('gz', 0.0)
+        
+        imu_msg.linear_acceleration.x = json_data.get('ax', 0.0)
+        imu_msg.linear_acceleration.y = json_data.get('ay', 0.0)
+        imu_msg.linear_acceleration.z = json_data.get('az', 0.0)
+        
+        self.imu_publisher.publish(imu_msg)
+        self.get_logger().info(f"Published IMU data: {imu_msg}")
 
     def handle_default(self, json_data):
         pass
