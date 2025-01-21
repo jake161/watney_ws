@@ -34,7 +34,6 @@ class SerialNode(Node):
             if 'T' in json_data:
                 t_value = json_data['T']
                 handlers = {
-                    1001: self.handle_1001,
                     1002: self.handle_1002,
                     # Add more handlers as needed
                 }
@@ -45,10 +44,6 @@ class SerialNode(Node):
 
         except json.JSONDecodeError as e:
             self.get_logger().error(f"Failed to decode JSON: {e}")
-
-    def handle_1001(self, json_data):
-        self.get_logger().info("Handling T=1001")
-        # Add your handling code here
 
     def handle_1002(self, json_data):
         self.get_logger().info("Handling T=1002")
