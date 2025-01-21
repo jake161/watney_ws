@@ -29,7 +29,7 @@ class SerialNode(Node):
     def handle_json(self, data):
         try:
             json_data = json.loads(data)
-            self.get_logger().info(f"Parsed JSON: {json_data}")
+            #self.get_logger().info(f"Parsed JSON: {json_data}")
             
             if 'T' in json_data:
                 t_value = json_data['T']
@@ -50,7 +50,8 @@ class SerialNode(Node):
         # Add your handling code here
 
     def handle_default(self, json_data):
-        self.get_logger().error("T value not in dictionary")
+        pass
+        #self.get_logger().error("T value not in dictionary")
         # There should always be a value for T
 
     def write_serial(self, msg):
