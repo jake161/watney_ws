@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from high_to_low.msg import Handler1001
 import serial
 import threading
 import argparse
@@ -11,6 +12,7 @@ class SerialNode(Node):
         super().__init__('high_to_low_serial_node')
         self.publisher_ = self.create_publisher(String, '/h2l/read', 10) #continuosly publish to read
         self.subscription = self.create_subscription(String, '/h2l/write', self.write_serial, 10) # setup callback to write_serial
+        self.feedback_publisher = self.create_publisher(Handler1001, '/ugv/base_feedback', 10)
         self.subscription  # prevent unused variable warning
         self.ser = serial.Serial(port, baudrate, dsrdtr=None)
         self.ser.setRTS(False)
@@ -48,7 +50,14 @@ class SerialNode(Node):
 
     def handle_1001(self, json_data):
         self.get_logger().info("Handling T=1001")
-        # Add your handling code here
+        msg = Handler1001()
+        msg.T = json_data['T']
+        msg.L = json_data['L']
+        msg.R = json_data['R']
+        msg.r = json_data['r']
+        msg.p = json_data['p']
+        msg.v = json_data['v']
+        self.feedback_publisher.publish(msg)
 
     def handle_1002(self, json_data):
         self.get_logger().info("Handling T=1002")
